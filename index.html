@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Geolocation</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
+<script>
+  alert('Install');
+var map;
+var directionsDisplay;
+var directionsService = new google.maps.DirectionsService();
+directionsDisplay = new google.maps.DirectionsRenderer();
+function initialize() {
+  var mapOptions = {
+    zoom: 12
+  };
+  map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);
+  directionsDisplay.setMap(map);
+  if(navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      var pos = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+      new google.maps.Marker({
+          map: map,
+          position: pos
+        });
+        // Draw a circle around the user position to have an idea of the current localization accuracy
+      var circle = new google.maps.Circle({
+        center: pos,
+        radius: position.coords.accuracy,
+        map: map,
+        //fillColor: '#FFFFFF',
+        fillOpacity: 0.1,
+        strokeColor: '#7CB942',
+        strokeOpacity: 1.0
+      });
+      map.fitBounds(circle.getBounds());
+    },
+    function() {
+      handleNoGeolocation(true);
+    });
+    //
+    } else {
+    // Browser doesn't support Geolocation
+    handleNoGeolocation(false);
+    }
+}
+//error in browser 
+function handleNoGeolocation(errorFlag) {
+    if (errorFlag) {
+      var content = 'Error: The Geolocation service failed.';
+    } else {
+      var content = 'Error: Your browser doesn\'t support geolocation.';
+    }
+    var options = {
+      map: map,
+      position: new google.maps.LatLng(60, 105),
+      content: content
+    };
+    var infowindow = new google.maps.InfoWindow(options);
+    map.setCenter(options.position);
+}
+//end error browser
+function calcRoute() {
+    var start = document.getElementById('source').value;
+    var end = document.getElementById('destination').value;
+    //var waypts = [];
+    var request = {
+        origin: start,
+        destination: end,
+        //waypoints: waypts,
+        optimizeWaypoints: true,
+        travelMode: google.maps.TravelMode.DRIVING
+    };
+    directionsService.route(request, function(response, status) {
+      if (status == google.maps.DirectionsStatus.OK) {
+        directionsDisplay.setDirections(response);
+        }
+    });
+}
+google.maps.event.addDomListener(window, 'load', initialize);
+
+</script>
+<style type="text/css">
+      #map-canvas {
+        width: 500px;
+        height: 500px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>hello world</div>
+  <div id="map-canvas"></div>
+  <input type="text" name="source" id="source">
+  <input type="text" name="destination" id="destination">
+  <input type="button" onclick="calcRoute()" value="submit">
+  </body>
+</html>
+
